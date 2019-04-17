@@ -70,7 +70,8 @@ class FasterPay_Gateway extends FasterPay_Abstract {
             'amount' => $orderData['total'],
             'currency' => $orderData['currencyCode'],
             'merchant_order_id' => $orderData['order_id'],
-            'success_url' => !empty($this->settings['success_url']) ? $this->settings['success_url'] : $order->get_checkout_order_received_url()
+            'success_url' => !empty($this->settings['success_url']) ? $this->settings['success_url'] : $order->get_checkout_order_received_url(),
+            'module_source' => 'woocommerce'
         );
 
         try {

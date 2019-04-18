@@ -26,6 +26,7 @@ class FasterPay_Gateway extends FasterPay_Abstract {
             'subscriptions',
             'subscription_suspension',
             'subscription_cancellation',
+            'subscription_reactivation',
         );
 
         parent::__construct();

@@ -5,7 +5,7 @@ defined('ABSPATH') or exit();
  * Plugin Name: FasterPay for WooCommerce
  * Plugin URI:
  * Description: Official FasterPay module for WordPress WooCommerce.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: The FasterPay Team
  * Author URI: https://www.fasterpay.com/
  * Text Domain: fasterpay-for-woocommerce

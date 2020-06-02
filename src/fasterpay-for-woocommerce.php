@@ -5,7 +5,7 @@ defined('ABSPATH') or exit();
  * Plugin Name: FasterPay for WooCommerce
  * Plugin URI:
  * Description: Official FasterPay module for WordPress WooCommerce.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: The FasterPay Team
  * Author URI: https://www.fasterpay.com/
  * Text Domain: fasterpay-for-woocommerce
@@ -51,11 +51,24 @@ add_action('plugins_loaded', 'load_fasterpay_payments', 0);
  * Add FasterPay Scripts
  */
 function fasterpay_scripts() {
-    wp_register_script('placeholder', FP_PLUGIN_URL . '/assets/js/payment.js', array('jquery'), '1', true);
-    wp_enqueue_script('placeholder');
+    wp_register_script('fasterpay_script', FP_PLUGIN_URL . '/assets/js/payment.js', array('jquery'), '1', true);
+    wp_enqueue_script('fasterpay_script');
 }
 
 add_action('wp_enqueue_scripts', 'fasterpay_scripts');
+
+/**
+ * Add FasterPay style in admin section
+ */
+function fasterpay_admin_scripts() {
+    $screen = get_current_screen();
+    if ($screen->id == 'woocommerce_page_wc-settings') {
+        wp_register_script('fasterpay_admin_script', FP_PLUGIN_URL . '/assets/js/admin_script.js', array(), '1', true);
+        wp_enqueue_script('fasterpay_admin_script');
+    }
+}
+
+add_action('admin_enqueue_scripts', 'fasterpay_admin_scripts');
 
 /**
  * Require the woocommerce plugin installed first

@@ -23,6 +23,7 @@ class FasterPay_Gateway extends FasterPay_Abstract {
         'reversal_refunded_partially',
         'reversal_refunded'
     ];
+    const MERCHANT_ORDER_ID_DELIMITER = '--#--';
 
     public $id;
     public $has_fields = true;
@@ -74,16 +75,26 @@ class FasterPay_Gateway extends FasterPay_Abstract {
         }
         $order = wc_get_order($order_id);
         $orderData = $this->get_order_data($order);
+        $suffixizedMerchantOrderId = $this->suffixize_merchant_order_id($orderData['order_id']);
 
         $params = array(
             'description' => 'Order #' . $orderData['order_id'],
             'amount' => $orderData['total'],
             'currency' => $orderData['currencyCode'],
-            'merchant_order_id' => $orderData['order_id'],
+            'merchant_order_id' => $suffixizedMerchantOrderId,
             'success_url' => !empty($this->settings['success_url']) ? $this->settings['success_url'] : $order->get_checkout_order_received_url(),
             'module_source' => 'woocommerce',
             'sign_version' => FasterPay\Services\Signature::SIGN_VERSION_2
         );
+
+        if ($this->settings['allow_pingback_url'] == 'yes') {
+            $pingback = array(
+                'pingback_url' => !empty($this->settings['pingback_url']) ? $this->settings['pingback_url'] : $this->getDefaultPingbackUrl(),
+            );
+            $params = wp_parse_args($pingback, $params);
+        }
+
+        $order->add_order_note(sprintf(__('Payment was sent to FasterPay with reference Number: %s', FP_TEXT_DOMAIN),  $suffixizedMerchantOrderId));
 
         try {
             if (function_exists('wcs_order_contains_subscription') && wcs_order_contains_subscription($order)) {
@@ -288,6 +299,32 @@ class FasterPay_Gateway extends FasterPay_Abstract {
     }
 
     /**
+     * @param $order_id
+     * @return string
+     */
+    public function suffixize_merchant_order_id($order_id) {
+        $suffixizedMerchantOrderId = $order_id . self::MERCHANT_ORDER_ID_DELIMITER . preg_replace('#^https?://#', '', get_site_url());
+        return $suffixizedMerchantOrderId;
+    }
+
+    /**
+     * @param $merchant_order_id
+     * @return mixed|string
+     */
+    public function unsuffixize_merchant_order_id($merchant_order_id) {
+        $unsuffixize = explode(self::MERCHANT_ORDER_ID_DELIMITER, $merchant_order_id);
+        return $unsuffixize[0];
+    }
+
+    /**
+     * @return string
+     */
+    protected function getDefaultPingbackUrl() {
+        $pingback_url = get_site_url() . '/?wc-api=fasterpay_gateway&action=ipn';
+        return $pingback_url;
+    }
+
+    /**
      * @param $is_supported
      * @param $feature
      * @param $subscription
@@ -477,13 +514,13 @@ class FasterPay_Gateway extends FasterPay_Abstract {
             throw new Exception($refund->get_error_message());
         }
 
-        $order->add_order_note(__(sprintf('Refund approved by FasterPay - Transaction Id: %1$s - Ref Id: %2$s', $fpPaymentId, $refId),
-            FP_TEXT_DOMAIN));
+        $order->add_order_note(sprintf(__('Refund approved by FasterPay - Transaction Id: %1$s - Ref Id: %2$s', FP_TEXT_DOMAIN),
+            $fpPaymentId, $refId));
     }
 
     protected function processOneTimePayment($order, $pingbackData) {
         $fpPaymentId = $this->getFpPaymentOrderId($pingbackData);
-        $order->add_order_note(__(sprintf('Payment approved by FasterPay - Transaction Id: %s', $fpPaymentId), FP_TEXT_DOMAIN));
+        $order->add_order_note(sprintf(__('Payment approved by FasterPay - Transaction Id: %s', FP_TEXT_DOMAIN), $fpPaymentId));
         $order->payment_complete($fpPaymentId);
     }
 
@@ -506,8 +543,8 @@ class FasterPay_Gateway extends FasterPay_Abstract {
         $this->setSubscriptionKeyByOrderId($this->getWcOrderId($order), $fpPaymentId);
         $this->setFpSubscriptionId($this->getWcSubscriptionId($subscription), $pingbackData['subscription']['id']);
 
-        $order->add_order_note(__(sprintf('Payment approved by FasterPay - Transaction Id: %s', $fpPaymentId),
-            FP_TEXT_DOMAIN));
+        $order->add_order_note(sprintf(__('Payment approved by FasterPay - Transaction Id: %s', FP_TEXT_DOMAIN),
+            $fpPaymentId));
         $order->payment_complete($fpPaymentId);
 
         if (!empty($subscription)) {
@@ -577,6 +614,8 @@ class FasterPay_Gateway extends FasterPay_Abstract {
             $initOrderId = $pingbackData['payment_order']['merchant_order_id'];
         }
 
+        $initOrderId = $this->unsuffixize_merchant_order_id($initOrderId);
+
         return $initOrderId;
     }
 
@@ -602,7 +641,7 @@ class FasterPay_Gateway extends FasterPay_Abstract {
     protected function getFpPaymentMerchantOrderId($pingbackData) {
         $paymentMerchantOrderId = null;
         if (!empty($pingbackData['payment_order']['merchant_order_id'])) {
-            $paymentMerchantOrderId = $pingbackData['payment_order']['merchant_order_id'];
+            $paymentMerchantOrderId = $this->unsuffixize_merchant_order_id($pingbackData['payment_order']['merchant_order_id']);
         }
         return $paymentMerchantOrderId;
     }

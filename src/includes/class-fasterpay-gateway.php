@@ -206,13 +206,7 @@ class FasterPay_Gateway extends FasterPay_Abstract {
                     $pingbackData = $this->get_post_data();
                     break;
                 case FasterPay\Services\Signature::SIGN_VERSION_2:
-                    global $wp_filesystem;
-                    if (empty($wp_filesystem)) {
-                        require_once(ABSPATH . '/wp-admin/includes/file.php');
-                        WP_Filesystem();
-                    }
-
-                    $rawPostData = $wp_filesystem->get_contents('php://input');
+                    $rawPostData = file_get_contents('php://input');
                     $validationParams = [
                         'pingbackData' => $rawPostData,
                         'signVersion' => $signVersion,
@@ -221,21 +215,21 @@ class FasterPay_Gateway extends FasterPay_Abstract {
                     $pingbackData = json_decode($rawPostData, 1);
                     break;
                 default:
-                    throw new Exception('NOK');
+                    throw new Exception('NOK - Wrong sign version - ' . $signVersion);
             }
 
             if (empty($pingbackData)) {
-                throw new Exception('NOK');
+                throw new Exception('NOK - Empty pingback data');
             }
 
             $order = $this->getWcRootOrder($pingbackData);
 
             if (!$order) {
-                throw new Exception('The order is Invalid!');
+                throw new Exception('NOK - The order is Invalid!');
             }
 
             if (!($paymentGateway = $this->getPaymentGatewayFromOrder($order))) {
-                throw new Exception('NOK');
+                throw new Exception('NOK - Wrong Payment Gateway');
             }
 
             $gateway = new FasterPay\Gateway(array(
@@ -245,7 +239,7 @@ class FasterPay_Gateway extends FasterPay_Abstract {
             ));
 
             if (!$gateway->pingback()->validate($validationParams)) {
-                throw new Exception('NOK');
+                throw new Exception('NOK - Invalid Pingback');
             }
 
             if ($this->isPaymentEvent($pingbackData)) {
@@ -253,12 +247,12 @@ class FasterPay_Gateway extends FasterPay_Abstract {
             } elseif ($this->isRefundEvent($pingbackData)) {
                 $this->processRefundEvent($order, $pingbackData);
             } else {
-                throw new Exception('Invalid pingback event!');
+                throw new Exception('NOK - Invalid pingback event');
             }
 
             exit(FP_DEFAULT_SUCCESS_PINGBACK_VALUE);
         } catch (Exception $e) {
-            exit($e->getMessage());
+            exit('NOK - ' . $e->getMessage());
         }
     }
 

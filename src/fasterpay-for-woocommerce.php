@@ -5,7 +5,7 @@ defined('ABSPATH') or exit();
  * Plugin Name: FasterPay for WooCommerce
  * Plugin URI:
  * Description: Official FasterPay module for WordPress WooCommerce.
- * Version: 1.3.1
+ * Version: 1.3.2
  * Author: The FasterPay Team
  * Author URI: https://www.fasterpay.com/
  * Text Domain: fasterpay-for-woocommerce
@@ -173,7 +173,7 @@ function fp_prepare_delivery_data(WC_Order $order, $status, FasterPay\Gateway $f
             "country_code" => $order->get_shipping_country() ? $order->get_shipping_country() : $order->get_billing_country(),
             "city" => $order->get_shipping_city() ? $order->get_shipping_city() : $order->get_billing_city(),
             "zip" => $order->get_shipping_postcode() ? $order->get_shipping_postcode() : $order->get_billing_postcode(),
-            "state" => $order->get_shipping_state() ? $order->get_shipping_state() : $order->get_billing_state() ?: 'N/A',
+            "state" => $order->get_shipping_state() ? $order->get_shipping_state() : ($order->get_billing_state() ?: 'N/A'),
             "street" => $order->get_shipping_address_1() ? $order->get_shipping_address_1() : $order->get_billing_address_1(),
             "phone" => $order->get_billing_phone(),
             "first_name" => $order->get_shipping_first_name() ? $order->get_shipping_first_name() : $order->get_billing_first_name(),

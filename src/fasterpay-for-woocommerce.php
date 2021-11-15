@@ -173,7 +173,7 @@ function fp_prepare_delivery_data(WC_Order $order, $status, FasterPay\Gateway $f
             "country_code" => $order->get_shipping_country() ? $order->get_shipping_country() : $order->get_billing_country(),
             "city" => $order->get_shipping_city() ? $order->get_shipping_city() : $order->get_billing_city(),
             "zip" => $order->get_shipping_postcode() ? $order->get_shipping_postcode() : $order->get_billing_postcode(),
-            "state" => $order->get_shipping_state() ? $order->get_shipping_state() : $order->get_billing_state() ?: 'N/A',
+            "state" => $order->get_shipping_state() ? $order->get_shipping_state() : ($order->get_billing_state() ?: 'N/A'),
             "street" => $order->get_shipping_address_1() ? $order->get_shipping_address_1() : $order->get_billing_address_1(),
             "phone" => $order->get_billing_phone(),
             "first_name" => $order->get_shipping_first_name() ? $order->get_shipping_first_name() : $order->get_billing_first_name(),

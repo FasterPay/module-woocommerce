@@ -41,7 +41,7 @@ class FasterPay_Gateway extends FasterPay_Abstract {
 
         parent::__construct();
 
-        if (is_file(FP_PLUGIN_PATH . '/assets/images/logo.png')) {
+        if (false && is_file(FP_PLUGIN_PATH . '/assets/images/logo.png')) {
             $this->icon = FP_PLUGIN_URL . '/assets/images/logo.png';
         } else {
             $this->title = $this->settings['title'];

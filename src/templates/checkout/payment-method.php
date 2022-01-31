@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
     <label for="payment_method_<?php echo $gateway->id; ?>">
         <?php echo $gateway->get_title(); ?>
-        <?php echo '<img style="float:none!important;display:inline-block;vertical-align:middle;" src="' . WC_HTTPS::force_https_url( $gateway->icon ) . '" alt="' . esc_attr( $gateway->get_title() ) . '" />' ?>
+        <?php /*echo '<img style="float:none!important;display:inline-block;vertical-align:middle;" src="' . WC_HTTPS::force_https_url( $gateway->icon ) . '" alt="' . esc_attr( $gateway->get_title() ) . '" />' */?>
         <?php echo '<img style="float:right;vertical-align:middle;" src="' . WC_HTTPS::force_https_url( $gateway->mcIcon ) . '" alt="' . esc_attr( 'MasterCard' ) . '" />' ?>
         <?php echo '<img style="float:right;vertical-align:middle;" src="' . WC_HTTPS::force_https_url( $gateway->visaIcon ) . '" alt="' . esc_attr( 'Visa' ) . '" />' ?>
     </label>

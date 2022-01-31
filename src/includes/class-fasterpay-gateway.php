@@ -41,7 +41,7 @@ class FasterPay_Gateway extends FasterPay_Abstract {
 
         parent::__construct();
 
-        if (is_file(FP_PLUGIN_PATH . '/assets/images/logo.png')) {
+        if (false && is_file(FP_PLUGIN_PATH . '/assets/images/logo.png')) {
             $this->icon = FP_PLUGIN_URL . '/assets/images/logo.png';
         } else {
             $this->title = $this->settings['title'];
@@ -62,7 +62,7 @@ class FasterPay_Gateway extends FasterPay_Abstract {
         add_action('woocommerce_subscription_cancelled_' . $this->id, array($this, 'cancel_subscription_action'));
         add_filter('woocommerce_subscription_payment_gateway_supports', array($this, 'add_feature_support_for_subscription'), 11, 3);
 
-        add_filter( 'wc_get_template', __CLASS__ . '::add_view_subscription_template', 10, 5 );
+        add_filter( 'wc_get_template', array($this, 'add_view_subscription_template'), 10, 5 );
     }
 
     /**
